@@ -21,13 +21,27 @@ Fraud Sentinel is a production-grade ML pipeline for real-time and batch fraud d
 ## Architecture
 ```mermaid
 flowchart TD
-    A[Raw Transaction Data] --> B[Sanitization Layer\nNaN · malformed · OOD inputs]
-    B --> C[Feature Engineering\nVectorized — NumPy / Pandas]
-    C --> D[Random Forest Model\nScikit-learn · Joblib-serialized]
-    D --> E[Percentile Thresholding\nTop 1% → BLOCK · Next 2% → REVIEW]
-    E --> F[FastAPI\nInference API]
-    E --> G[Streamlit\nAnalyst Dashboard]
+    A[Raw Transaction Data] --> B[Sanitization Layer]
+    B --> C[Feature Engineering]
+    C --> D[Random Forest Model]
+    D --> E[Percentile Thresholding]
+    E --> F[FastAPI]
+    E --> G[Streamlit]
+
+    B:::note
+    C:::note
+    D:::note
+    E:::note
+    F:::note
+    G:::note
 ```
+
+> **Sanitization Layer** — intercepts NaN, malformed, and out-of-distribution inputs before model reach.  
+> **Feature Engineering** — fully vectorized via NumPy / Pandas; no Python loops.  
+> **Random Forest Model** — Scikit-learn, Joblib-serialized.  
+> **Percentile Thresholding** — Top 1% → `BLOCK` · Next 2% → `REVIEW` · Rest → `PASS`.  
+> **FastAPI** — containerized inference API on port 8000.  
+> **Streamlit** — analyst dashboard on port 8501.
 
 ---
 
