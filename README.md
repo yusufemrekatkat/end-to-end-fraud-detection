@@ -1,4 +1,3 @@
-```markdown
 # Fraud Sentinel AI
 
 > End-to-end fraud detection pipeline — from raw transaction data to containerized inference.
@@ -15,43 +14,19 @@
 
 Fraud Sentinel is a production-grade ML pipeline for real-time and batch fraud detection. The system is built around three principles: **defensive ingestion**, **vectorized throughput**, and **dynamic risk thresholding** — replacing static probability cutoffs with percentile-based alert logic that mirrors real-world banking operations.
 
-Developed with a human-AI collaborative workflow during prototyping, architecture design, and debugging.
+> Developed with a human-AI collaborative workflow during prototyping, architecture design, and debugging.
 
 ---
 
 ## Architecture
-
-```
-Raw Transaction Data
-        │
-        ▼
-┌───────────────────┐
-│  Sanitization     │  ← NaN, malformed, out-of-distribution inputs
-│  Layer            │
-└────────┬──────────┘
-         │
-         ▼
-┌───────────────────┐
-│  Feature          │  ← Vectorized (NumPy / Pandas, no loops)
-│  Engineering      │
-└────────┬──────────┘
-         │
-         ▼
-┌───────────────────┐
-│  Random Forest    │  ← Scikit-learn, Joblib-serialized
-│  Model            │
-└────────┬──────────┘
-         │
-         ▼
-┌───────────────────┐
-│  Percentile       │  ← Top 1% → BLOCK / Next 2% → REVIEW
-│  Thresholding     │
-└────────┬──────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-FastAPI    Streamlit
-(serve)    (dashboard)
+```mermaid
+flowchart TD
+    A[Raw Transaction Data] --> B[Sanitization Layer\nNaN · malformed · OOD inputs]
+    B --> C[Feature Engineering\nVectorized — NumPy / Pandas]
+    C --> D[Random Forest Model\nScikit-learn · Joblib-serialized]
+    D --> E[Percentile Thresholding\nTop 1% → BLOCK · Next 2% → REVIEW]
+    E --> F[FastAPI\nInference API]
+    E --> G[Streamlit\nAnalyst Dashboard]
 ```
 
 ---
@@ -70,48 +45,37 @@ FastAPI    Streamlit
 
 ## Tech Stack
 
-**ML / Data**
-- Scikit-learn (Random Forest), NumPy, Pandas, Joblib
-
-**Backend**
-- FastAPI, Uvicorn, Python 3.11
-
-**Frontend**
-- Streamlit, Requests
-
-**Infrastructure**
-- Docker, Docker Compose, Git, Poetry
+| Layer | Tools |
+|---|---|
+| ML / Data | Scikit-learn, NumPy, Pandas, Joblib |
+| Backend | FastAPI, Uvicorn, Python 3.11 |
+| Frontend | Streamlit, Requests |
+| Infrastructure | Docker, Docker Compose, Git, Poetry |
 
 ---
 
 ## Project Structure
-
 ```
 end-to-end-fraud-detection/
-├── app_ui.py                      # Streamlit dashboard entry point
-├── pyproject.toml                 # Dependency management (Poetry)
-├── Makefile                       # Common task shortcuts
-│
+├── app_ui.py                        # Streamlit dashboard entry point
+├── pyproject.toml                   # Dependency management (Poetry)
+├── Makefile                         # Common task shortcuts
 ├── docker/
-│   ├── Dockerfile.serve           # Inference API image
-│   ├── Dockerfile.train           # Training pipeline image
+│   ├── Dockerfile.serve             # Inference API image
+│   ├── Dockerfile.train             # Training pipeline image
 │   └── docker-compose.yml
-│
 ├── fraud_detection/
-│   ├── config.py                  # Central config / constants
-│   ├── data/                      # Ingestion & sanitization
-│   ├── features/                  # Vectorized feature engineering
-│   ├── training/                  # Model training pipeline
-│   ├── serving/                   # FastAPI inference engine
-│   └── monitoring/                # Prediction logging & drift hooks
-│
+│   ├── config.py                    # Central config / constants
+│   ├── data/                        # Ingestion & sanitization
+│   ├── features/                    # Vectorized feature engineering
+│   ├── training/                    # Model training pipeline
+│   ├── serving/                     # FastAPI inference engine
+│   └── monitoring/                  # Prediction logging & drift hooks
 ├── models/
 │   ├── model_v0.1.0.joblib
 │   └── model_v0.1.0_metadata.json
-│
 ├── logs/
 │   └── predictions.jsonl
-│
 └── tests/
     ├── conftest.py
     ├── unit/
@@ -128,7 +92,6 @@ end-to-end-fraud-detection/
 - Python 3.11+
 
 ### 1. Start the inference API
-
 ```bash
 docker compose -f docker/docker-compose.yml up --build serve
 ```
@@ -136,9 +99,7 @@ docker compose -f docker/docker-compose.yml up --build serve
 API available at `http://localhost:8000`
 
 ### 2. Launch the dashboard
-
 ```bash
-# In a separate terminal
 streamlit run app_ui.py
 ```
 
@@ -154,13 +115,12 @@ Dashboard available at `http://localhost:8501`
 
 ---
 
-## Risk Classification Logic
-
+## Risk Classification
 ```
-P(fraud) → sorted descending across batch
-├── Top 1%      →  BLOCK
-├── Next 2%     →  REVIEW
-└── Remaining   →  PASS
+P(fraud) sorted descending across batch
+├── Top 1%    →  BLOCK
+├── Next 2%   →  REVIEW
+└── Remaining →  PASS
 ```
 
 Thresholds are computed per-batch at inference time, not hardcoded.
@@ -170,4 +130,3 @@ Thresholds are computed per-batch at inference time, not hardcoded.
 ## License
 
 [MIT](./LICENSE)
-```
