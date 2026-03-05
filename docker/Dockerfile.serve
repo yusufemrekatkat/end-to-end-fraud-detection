@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies first (cached if pyproject.toml unchanged)
+COPY pyproject.toml .
+RUN pip install --no-cache-dir .
+
+# Copy source code and config
+COPY fraud_detection/ fraud_detection/
+COPY models/ models/
+COPY logs/ logs/
+COPY .env .env
+
+EXPOSE 8000
+
+CMD ["uvicorn", "fraud_detection.serving.api:app", "--host", "0.0.0.0", "--port", "8000"]

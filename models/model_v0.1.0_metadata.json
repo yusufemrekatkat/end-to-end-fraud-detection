@@ -1,0 +1,34 @@
+{
+  "version": "0.1.0",
+  "metrics": {
+    "threshold": 0.5,
+    "auc_roc": 0.8954655616061277,
+    "auc_pr": 0.2708506249137556,
+    "precision": 0.3684210526315789,
+    "recall": 0.20588235294117646,
+    "f1": 0.2641509433962264,
+    "tp": 7,
+    "fp": 12,
+    "tn": 1954,
+    "fn": 27
+  },
+  "features": [
+    "amount",
+    "amount_log",
+    "customer_age",
+    "is_online",
+    "is_foreign",
+    "merchant_category_encoded",
+    "card_type_encoded",
+    "transaction_hour",
+    "transaction_day_of_week",
+    "is_night",
+    "is_weekend",
+    "is_high_risk_category",
+    "hour_sin",
+    "hour_cos",
+    "day_sin",
+    "day_cos"
+  ],
+  "date": "2026-03-01T07:45:20.106938+00:00"
+}

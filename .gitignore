@@ -1,0 +1,30 @@
+# Python & Sanal Ortam
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Güvenlik (Şifreler vb.)
+.env
+
+# Devasa Veri Dosyaları
+*.csv
+*.xlsx
+data/raw/*.csv
+data/raw/*.parquet
+data/processed/*.csv
+
+# Loglar ve Deneyler
+logs/*.log
+mlruns/
+
+# IDE Ayarları
+.vscode/
+.idea/
+
+# Modeller (Tüm joblib'leri engelle, SADECE ana modelimize izin ver)
+models/*.joblib
+!models/model_v0.1.0.joblib
+
+*.egg-info/
