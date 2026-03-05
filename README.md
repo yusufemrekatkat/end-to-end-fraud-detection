@@ -1,50 +1,173 @@
-#  Fraud Sentinel AI: End-to-End Fraud Detection Pipeline
+```markdown
+# Fraud Sentinel AI
 
-Fraud Sentinel is a production-ready, end-to-end machine learning pipeline designed to detect fraudulent transactions. Moving beyond isolated model training, this project is built with industrial-grade data ingestion, high-speed vectorized batch processing, and a fully containerized microservices architecture.
+> End-to-end fraud detection pipeline — from raw transaction data to containerized inference.
 
-*Note: An AI-assisted workflow was utilized during rapid prototyping, architectural design, and debugging to embrace modern human-AI collaborative engineering.*
-
----
-
-##  Key Architectural Features
-
-*  **High-Performance Vectorized Processing:** Eliminates traditional `for`-loops by leveraging Pandas and NumPy vectorization. Capable of processing massive datasets (555K+ rows) in mere seconds without API bottlenecks.
-*  **Dynamic Percentile Thresholding:** Emulates real-world banking "Alert Rates". Instead of static probability thresholds, the system dynamically flags the top 1% of the riskiest transactions as `BLOCK` and the next 2% as `REVIEW`, elegantly handling highly imbalanced data.
-*  **Defensive Data Ingestion:** A sanitization layer that intercepts missing (NaN), malformed, or unexpected inputs before they reach the model, preventing system crashes and ensuring 100% API uptime.
-*  **Containerized Backend:** The FastAPI-based inference engine, ML models, and dependencies are fully isolated and served via Docker.
-*  **Executive Analyst Dashboard:** A robust Streamlit frontend featuring Dark Mode protection. It provides financial risk summaries (e.g., "Total Amount at Risk"), interactive metrics, and the ability to export only suspicious transactions to optimize file sizes.
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=flat-square&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-gray?style=flat-square)
 
 ---
 
-##  Tech Stack
+## Overview
 
-* **Machine Learning:** Scikit-learn (Random Forest), NumPy, Pandas, Joblib
-* **Backend API:** FastAPI, Uvicorn, Python 3.11
-* **Frontend UI:** Streamlit, Requests
-* **DevOps & MLOps:** Docker, Docker Compose, Git
+Fraud Sentinel is a production-grade ML pipeline for real-time and batch fraud detection. The system is built around three principles: **defensive ingestion**, **vectorized throughput**, and **dynamic risk thresholding** — replacing static probability cutoffs with percentile-based alert logic that mirrors real-world banking operations.
+
+Developed with a human-AI collaborative workflow during prototyping, architecture design, and debugging.
 
 ---
 
-##  Getting Started
+## Architecture
+
+```
+Raw Transaction Data
+        │
+        ▼
+┌───────────────────┐
+│  Sanitization     │  ← NaN, malformed, out-of-distribution inputs
+│  Layer            │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  Feature          │  ← Vectorized (NumPy / Pandas, no loops)
+│  Engineering      │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  Random Forest    │  ← Scikit-learn, Joblib-serialized
+│  Model            │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  Percentile       │  ← Top 1% → BLOCK / Next 2% → REVIEW
+│  Thresholding     │
+└────────┬──────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+FastAPI    Streamlit
+(serve)    (dashboard)
+```
+
+---
+
+## Key Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| Vectorized batch processing | Handles 555K+ rows in seconds; eliminates Python loop overhead |
+| Percentile thresholding | Decouples alert rate from raw probability; handles class imbalance by design |
+| Defensive ingestion layer | Prevents model-side crashes from malformed inputs; guarantees API uptime |
+| Docker isolation | Reproducible serving environment; no dependency drift |
+| Streamlit frontend | Rapid analyst-facing UI with no JS overhead |
+
+---
+
+## Tech Stack
+
+**ML / Data**
+- Scikit-learn (Random Forest), NumPy, Pandas, Joblib
+
+**Backend**
+- FastAPI, Uvicorn, Python 3.11
+
+**Frontend**
+- Streamlit, Requests
+
+**Infrastructure**
+- Docker, Docker Compose, Git, Poetry
+
+---
+
+## Project Structure
+
+```
+end-to-end-fraud-detection/
+├── app_ui.py                      # Streamlit dashboard entry point
+├── pyproject.toml                 # Dependency management (Poetry)
+├── Makefile                       # Common task shortcuts
+│
+├── docker/
+│   ├── Dockerfile.serve           # Inference API image
+│   ├── Dockerfile.train           # Training pipeline image
+│   └── docker-compose.yml
+│
+├── fraud_detection/
+│   ├── config.py                  # Central config / constants
+│   ├── data/                      # Ingestion & sanitization
+│   ├── features/                  # Vectorized feature engineering
+│   ├── training/                  # Model training pipeline
+│   ├── serving/                   # FastAPI inference engine
+│   └── monitoring/                # Prediction logging & drift hooks
+│
+├── models/
+│   ├── model_v0.1.0.joblib
+│   └── model_v0.1.0_metadata.json
+│
+├── logs/
+│   └── predictions.jsonl
+│
+└── tests/
+    ├── conftest.py
+    ├── unit/
+    └── integration/
+```
+
+---
+
+## Quickstart
 
 ### Prerequisites
-Make sure you have [Docker](https://www.docker.com/) and [Python 3.11+](https://www.python.org/) installed on your machine.
 
-### 1. Fire up the Backend (Docker)
-Initialize the containerized machine learning serving API:
+- [Docker](https://www.docker.com/) + Docker Compose
+- Python 3.11+
+
+### 1. Start the inference API
+
 ```bash
 docker compose -f docker/docker-compose.yml up --build serve
+```
 
-The API will be available at http://localhost:8000.
+API available at `http://localhost:8000`
 
-2. Launch the Frontend (Executive UI)
-Open a new terminal, activate your virtual environment, and start the dashboard:
+### 2. Launch the dashboard
 
-Bash
+```bash
+# In a separate terminal
 streamlit run app_ui.py
-The UI will open in your default browser at http://localhost:8501.
+```
 
-💡 Usage
-Single Transaction Check: Navigate to the " Single Query" tab in the UI to manually test individual transactions.
+Dashboard available at `http://localhost:8501`
 
-Batch Analytics (Dashboard): Upload massive .csv files in the " Batch Dashboard" tab. The system will process hundreds of thousands of rows in seconds, providing an executive summary of blocked transactions and allowing you to download the filtered suspicious data.
+---
+
+## Usage
+
+**Single transaction** — Use the *Single Query* tab to submit individual transactions and inspect model output with risk label.
+
+**Batch analytics** — Upload a `.csv` file in the *Batch Dashboard* tab. The pipeline processes the full dataset and returns an executive summary: blocked volume, amount at risk, and a filtered export of flagged transactions.
+
+---
+
+## Risk Classification Logic
+
+```
+P(fraud) → sorted descending across batch
+├── Top 1%      →  BLOCK
+├── Next 2%     →  REVIEW
+└── Remaining   →  PASS
+```
+
+Thresholds are computed per-batch at inference time, not hardcoded.
+
+---
+
+## License
+
+[MIT](./LICENSE)
+```
